@@ -1,2 +1,11 @@
-# OMEGASIX-O6
-OMEGASIX (O6) — Next generation codebase
+
+  # Interactive Music Web App
+
+  This is a code bundle for Interactive Music Web App. The original project is available at https://www.figma.com/design/Nm2xaZzaaU9mdPETJbODey/Interactive-Music-Web-App.
+
+  ## Running the code
+
+  Run `npm i` to install the dependencies.
+
+  Run `npm run dev` to start the development server.
+  
