@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { Home, Search, Library, Heart, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { GlassPanel } from './GlassPanel';
+import { Logo } from './Logo';
 
 interface SidebarProps {
   activeTab: string;
@@ -19,9 +20,14 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="hidden md:flex flex-col gap-4 p-4 w-64 h-full">
-      <GlassPanel className="flex-1 p-4">
-        <div className="flex flex-col gap-2 relative">
+    <div className="hidden md:flex flex-col gap-3 p-4 w-64 h-full flex-shrink-0">
+      {/* O6 Logo */}
+      <div className="px-2 py-3">
+        <Logo />
+      </div>
+
+      <GlassPanel className="flex-1 p-3">
+        <div className="flex flex-col gap-1 relative">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -72,11 +78,12 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         </div>
       </GlassPanel>
 
-      <GlassPanel className="p-4">
+      <GlassPanel className="p-3">
         <motion.button
           onClick={toggleTheme}
           className="w-full flex items-center justify-between px-4 py-3 rounded-full hover:bg-glass-bg/30 transition-colors"
           whileTap={{ scale: 0.92 }}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           <span className="text-text-primary text-[15px] font-semibold">Theme</span>
           <div className="relative w-10 h-10 flex items-center justify-center">
