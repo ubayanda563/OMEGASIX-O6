@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { parseBlob } from 'music-metadata-browser';
 import { Track, getAllTracks, saveTrack, saveFile, deleteTrack } from '../data/db';
 import { SUPPORTED_AUDIO_TYPES } from '../data/musicData';
+import { computeAudioHash, generateWaveformSamples, getTrackQualityLabel } from '../data/audioUtils';
 
 function parseFilename(name: string): { title: string; artist: string } {
   const stem = name.replace(/\.[^/.]+$/, '');
@@ -44,6 +45,9 @@ async function extractMetadata(file: File): Promise<Omit<Track, 'id' | 'fileName
     }
     const durFromMeta = meta.format.duration;
     const duration = (durFromMeta && isFinite(durFromMeta)) ? durFromMeta : await getAudioDuration(file);
+    const year = meta.common.year;
+    const bpm = meta.common.bpm;
+    const bitrate = meta.format.bitrate ? Math.round(meta.format.bitrate / 1000) : undefined;
     return {
       title: title || fallback.title,
       artist: artist || fallback.artist,
@@ -51,6 +55,9 @@ async function extractMetadata(file: File): Promise<Omit<Track, 'id' | 'fileName
       genre: (genre && genre[0]) || 'Unknown',
       duration,
       artwork,
+      year: year ? Number(year) : undefined,
+      bpm: bpm ? Number(bpm) : undefined,
+      bitrate,
     };
   } catch {
     const duration = await getAudioDuration(file);
@@ -86,6 +93,13 @@ export function useLibrary() {
       setImportProgress(Math.round(((i) / files.length) * 100));
       try {
         const meta = await extractMetadata(file);
+        const hash = await computeAudioHash(file);
+        const waveform = await generateWaveformSamples(file, 96);
+        const qualityLabel = getTrackQualityLabel(meta.bitrate);
+        const duplicate = [...tracks, ...newTracks].find((candidate) =>
+          candidate.hash === hash ||
+          (candidate.title === meta.title && candidate.artist === meta.artist && Math.abs(candidate.duration - meta.duration) < 0.8)
+        );
         const id = crypto.randomUUID();
         const track: Track = {
           id,
@@ -94,6 +108,10 @@ export function useLibrary() {
           fileSize: file.size,
           dateAdded: Date.now(),
           liked: false,
+          hash,
+          waveform,
+          qualityLabel,
+          duplicateOf: duplicate ? duplicate.id : null,
         };
         await saveFile(id, file);
         await saveTrack(track);
@@ -108,7 +126,7 @@ export function useLibrary() {
     importingRef.current = false;
     setIsImporting(false);
     setImportProgress(0);
-  }, []);
+  }, [tracks]);
 
   const removeTrack = useCallback(async (id: string) => {
     await deleteTrack(id);
@@ -122,6 +140,11 @@ export function useLibrary() {
       if (track) saveTrack(track);
       return updated;
     });
+  }, []);
+
+  const updateTrack = useCallback(async (updatedTrack: Track) => {
+    setTracks((prev) => prev.map((t) => t.id === updatedTrack.id ? updatedTrack : t));
+    await saveTrack(updatedTrack);
   }, []);
 
   const likedTracks = tracks.filter((t) => t.liked);

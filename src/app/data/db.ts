@@ -10,6 +10,14 @@ export interface Track {
   fileSize: number;
   dateAdded: number;
   liked: boolean;
+  year?: number;
+  bpm?: number;
+  bitrate?: number;
+  hash?: string;
+  waveform?: number[];
+  lyrics?: string;
+  qualityLabel?: string;
+  duplicateOf?: string | null;
 }
 
 const DB_NAME = 'resonance-db';

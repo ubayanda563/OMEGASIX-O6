@@ -1,8 +1,10 @@
 import { useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, Pause, SkipForward, SkipBack, Heart, Volume2, VolumeX, Music } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Heart, Volume2, VolumeX, Music, Edit3 } from 'lucide-react';
 import { Track } from '../data/db';
 import { formatDuration } from '../data/musicData';
+import { WaveformBar } from './WaveformBar';
+import { LyricsEditor } from './LyricsEditor';
 
 interface AudioPlayerProps {
   track: Track | null;
@@ -10,6 +12,8 @@ interface AudioPlayerProps {
   currentTime: number;
   duration: number;
   volume: number;
+  waveform?: number[];
+  lyrics?: string;
   isLiked: boolean;
   onPlayPause: () => void;
   onNext: () => void;
@@ -17,6 +21,7 @@ interface AudioPlayerProps {
   onSeek: (t: number) => void;
   onVolumeChange: (v: number) => void;
   onLikeToggle: () => void;
+  onEditLyrics: () => void;
 }
 
 function ArtworkPlaceholder({ size = 48 }: { size?: number }) {
@@ -84,6 +89,8 @@ export function AudioPlayer({
   currentTime,
   duration,
   volume,
+  waveform,
+  lyrics,
   isLiked,
   onPlayPause,
   onNext,
@@ -91,6 +98,7 @@ export function AudioPlayer({
   onSeek,
   onVolumeChange,
   onLikeToggle,
+  onEditLyrics,
 }: AudioPlayerProps) {
   if (!track) return null;
 
@@ -174,6 +182,9 @@ export function AudioPlayer({
             </div>
             <span className="text-text-muted text-xs w-8 tabular-nums">{formatDuration(duration)}</span>
           </div>
+          <div className="w-full mt-3">
+            <WaveformBar waveform={waveform} currentTime={currentTime} duration={duration} onSeek={onSeek} />
+          </div>
         </div>
 
         {/* Right: volume */}
@@ -195,6 +206,18 @@ export function AudioPlayer({
             style={{ accentColor: 'var(--accent-primary)' }}
             aria-label="Volume"
           />
+        </div>
+      </div>
+      <div className="hidden md:flex items-center justify-between gap-3 px-6 py-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="flex items-center gap-2 text-text-secondary text-sm">
+          <Edit3 size={16} />
+          <button
+            type="button"
+            onClick={onEditLyrics}
+            className="font-semibold text-text-primary hover:text-text-secondary"
+          >
+            Edit Lyrics
+          </button>
         </div>
       </div>
 

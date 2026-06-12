@@ -14,7 +14,22 @@ import { useAudioPlayer } from './hooks/useAudioPlayer';
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const { tracks, likedTracks, isImporting, importProgress, importFiles, removeTrack, toggleLike } = useLibrary();
-  const { currentTrack, isPlaying, currentTime, duration, volume, play, pause, resume, seek, setVolume, setOnEnded, updateCurrentTrack } = useAudioPlayer();
+  const {
+    currentTrack,
+    isPlaying,
+    currentTime,
+    duration,
+    volume,
+    waveform,
+    lyrics,
+    play,
+    pause,
+    resume,
+    seek,
+    setVolume,
+    setOnEnded,
+    updateCurrentTrack,
+  } = useAudioPlayer();
 
   const handleTrackSelect = useCallback(async (id: string) => {
     const track = tracks.find((t) => t.id === id);
@@ -87,6 +102,8 @@ export default function App() {
           currentTime={currentTime}
           duration={duration}
           volume={volume}
+          waveform={currentTrack?.waveform}
+          lyrics={currentTrack?.lyrics}
           isLiked={isCurrentLiked}
           onPlayPause={handlePlayPause}
           onNext={handleNext}
@@ -94,6 +111,9 @@ export default function App() {
           onSeek={seek}
           onVolumeChange={setVolume}
           onLikeToggle={() => currentTrack && toggleLike(currentTrack.id)}
+          onEditLyrics={() => {
+            if (!currentTrack) return;
+          }}
         />
 
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
